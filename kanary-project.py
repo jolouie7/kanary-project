@@ -11,23 +11,24 @@ def main():
         page.goto('https://golookup.com/')
         fill_first_name(page, 'kevin')
         fill_last_name(page, 'lee')
-        select_state(page, 'AL')
+        select_state(page)
         page.click('button[type=submit]')
 
         # Close both modals
         location_modal_skip_btn = page.wait_for_selector(
-            '//*[@id="content"]/section/div[2]/div/div/div/form/div[3]/button[2]')
-        print('here: ', location_modal_skip_btn)
+            'button:has-text("Skip")', timeout=50000)
         location_modal_skip_btn.click()
+
         notification_close_btn = page.wait_for_selector(
-            '//*[@id="content"]/div/button')
+            '//*[@id="content"]/div/button', timeout=50000)
         notification_close_btn.click()
 
         try:
             success_text = page.wait_for_selector(
                 '//*[@id="content"]/section/div/section/div[1]/div[1]/h3')
 
-            if not success_text:
+            # No records found page
+            if not success_text and page.wait_for_selector('//*[@id="content"]/div[2]/div/div/div/div'):
                 print('No results found!!')
 
             # Get the headline text
@@ -53,8 +54,10 @@ def fill_last_name(page, last_name):
         raise Exception("Error in last name")
 
 
-def select_state(page, state):
+def select_state(page, state=None):
     try:
+        if state == None:
+            return
         page.select_option('select[name="state"]', state)
     except:
         raise Exception("Error selecting state")
