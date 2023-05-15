@@ -9,10 +9,15 @@ def main():
         browser = p.chromium.launch(headless=False, slow_mo=50)
         page = browser.new_page()
         page.goto('https://golookup.com/')
-        fill_first_name(page, 'kevin')
-        fill_last_name(page, 'lee')
-        select_state(page)
-        page.click('button[type=submit]')
+
+        try:
+            # Fill out the search form
+            fill_first_name(page, 'kevin')
+            fill_last_name(page, 'lee')
+            select_state(page)
+            page.click('button[type=submit]')
+        except:
+            raise Exception('Failed to fill out form')
 
         # Close both modals
         location_modal_skip_btn = page.wait_for_selector(
@@ -56,9 +61,10 @@ def fill_last_name(page, last_name):
 
 def select_state(page, state=None):
     try:
-        if state == None:
+        if state is None:
             return
-        page.select_option('select[name="state"]', state)
+        else:
+            page.select_option('select[name="state"]', state)
     except:
         raise Exception("Error selecting state")
 
