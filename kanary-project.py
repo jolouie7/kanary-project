@@ -1,6 +1,5 @@
 # sync api but can be used in async mode
 from playwright.sync_api import sync_playwright
-from bs4 import BeautifulSoup
 
 
 def main():
