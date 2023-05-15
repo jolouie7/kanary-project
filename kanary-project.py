@@ -12,8 +12,8 @@ def main():
 
         try:
             # Fill out the search form
-            fill_first_name(page, 'kevin')
-            fill_last_name(page, 'lee')
+            fill_first_name(page, 'stephen')
+            fill_last_name(page, 'curry')
             select_state(page)
             page.click('button[type=submit]')
         except:
@@ -46,6 +46,8 @@ def main():
 
 
 def fill_first_name(page, first_name):
+    if not first_name:
+        raise ValueError('First name cannot be empty')
     try:
         page.fill('input.frm-fld-w1', f'{first_name}')
     except:
@@ -53,6 +55,8 @@ def fill_first_name(page, first_name):
 
 
 def fill_last_name(page, last_name):
+    if not last_name:
+        raise ValueError('Last name cannot be empty')
     try:
         page.fill('input.frm-fld-w2', f'{last_name}')
     except:
