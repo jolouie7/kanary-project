@@ -85,7 +85,7 @@ def extract_phone_number(soup):
     return phone_numbers
 
 
-def extract_condifential_report_id(soup):
+def extract_confidential_report_id(soup):
     confidental_report_ids = []
     confidental_report_id_divs = soup.find_all(
         'div', {'class': 'td col col-md-2'})
@@ -98,14 +98,28 @@ def extract_condifential_report_id(soup):
 
 def create_person_dict(imgs, names, ages, locations, related_peoples, phone_numbers, condifential_report_ids):
     person_profiles = []
-    print('names len:', len(names))
     if names is not None:
         for i in range(len(names)):
             person = {'img': imgs[i], 'name': names[i], 'age': ages[i], 'location': locations[i],
                       'related people': related_peoples[i], 'phone number': phone_numbers[i], 'condifential report id': condifential_report_ids[i]}
-            print('person: ', person)
             person_profiles.append(person)
     return person_profiles
+
+
+def extract_person_profiles(soup):
+    imgs = extract_img(soup)
+    names = extract_name(soup)
+    ages = extract_age(soup)
+    locations = extract_location(soup)
+    related_peoples = extract_related_people(soup)
+    phone_numbers = extract_phone_number(soup)
+    confidential_report_ids = extract_confidential_report_id(soup)
+
+    # Create person profiles
+    people_profiles = create_person_dict(
+        imgs, names, ages, locations, related_peoples, phone_numbers, confidential_report_ids)
+
+    return people_profiles
 
 
 def fill_first_name(page, first_name):
@@ -169,10 +183,6 @@ def main():
             if not success_text and page.wait_for_selector('//*[@id="content"]/div[2]/div/div/div/div'):
                 print('No results found!!')
 
-            # Get the headline text
-            headline = page.inner_text('div.headline h3')
-            print('headline: ', headline)
-
             html = page.inner_html('#results')
             soup = BeautifulSoup(html, 'html.parser')
 
@@ -182,31 +192,7 @@ def main():
             all_profiles = []
             while more_button:
                 try:
-                    # Extract image src
-                    imgs = extract_img(soup)
-
-                    # Extract name
-                    names = extract_name(soup)
-
-                    # Extract age
-                    ages = extract_age(soup)
-
-                    # Extract location
-                    locations = extract_location(soup)
-
-                    # Extract Related People
-                    related_peoples = extract_related_people(soup)
-
-                    # extract phone numbers
-                    phone_numbers = extract_phone_number(soup)
-
-                    # extract Confidential Report ID
-                    condifential_report_ids = extract_condifential_report_id(
-                        soup)
-
-                    people_profiles = create_person_dict(
-                        imgs, names, ages, locations, related_peoples, phone_numbers, condifential_report_ids)
-
+                    people_profiles = extract_person_profiles(soup)
                     all_profiles += people_profiles
                     more_button.click()
 
@@ -219,32 +205,10 @@ def main():
                 except TimeoutError:
                     print(
                         "Timeout: More button not found within the specified timeout period.")
-                    # Get last page
-                    # Extract image src
-                    imgs = extract_img(soup)
+                    # Get data from the last page
 
-                    # Extract name
-                    names = extract_name(soup)
-
-                    # Extract age
-                    ages = extract_age(soup)
-
-                    # Extract location
-                    locations = extract_location(soup)
-
-                    # Extract Related People
-                    related_peoples = extract_related_people(soup)
-
-                    # extract phone numbers
-                    phone_numbers = extract_phone_number(soup)
-
-                    # extract Confidential Report ID
-                    condifential_report_ids = extract_condifential_report_id(
-                        soup)
-
-                    people_profiles = create_person_dict(
-                        imgs, names, ages, locations, related_peoples, phone_numbers, condifential_report_ids)
-
+                    # Create person profiles from the last page
+                    people_profiles = extract_person_profiles(soup)
                     all_profiles += people_profiles
                     break
 
