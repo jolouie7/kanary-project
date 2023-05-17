@@ -178,71 +178,73 @@ def select_state(page, state=None):
 
 
 def main():
-    # context manager
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False, slow_mo=50)
-        page = browser.new_page()
-        page.goto('https://golookup.com/')
+    try:
+        # context manager
+        with sync_playwright() as p:
+            browser = p.chromium.launch(headless=False, slow_mo=50)
+            page = browser.new_page()
+            page.goto('https://golookup.com/')
 
-        try:
-            # Fill out the search form
-            fill_first_name(page, 'stephen')
-            fill_last_name(page, 'curry')
-            select_state(page)
-            page.click('button[type=submit]')
-        except:
-            raise Exception('Failed to fill out form')
+            try:
+                # Fill out the search form
+                fill_first_name(page, 'stephen')
+                fill_last_name(page, 'curry')
+                select_state(page)
+                page.click('button[type=submit]')
+            except:
+                raise Exception('Failed to fill out form')
 
-        # Close both modals
-        location_modal_skip_btn = page.wait_for_selector(
-            'button:has-text("Skip")', timeout=50000)
-        location_modal_skip_btn.click()
+            # Close both modals
+            location_modal_skip_btn = page.wait_for_selector(
+                'button:has-text("Skip")', timeout=50000)
+            location_modal_skip_btn.click()
 
-        notification_close_btn = page.wait_for_selector(
-            '//*[@id="content"]/div/button', timeout=50000)
-        notification_close_btn.click()
+            notification_close_btn = page.wait_for_selector(
+                '//*[@id="content"]/div/button', timeout=50000)
+            notification_close_btn.click()
 
-        try:
-            success_text = page.wait_for_selector(
-                '//*[@id="content"]/section/div/section/div[1]/div[1]/h3')
+            try:
+                success_text = page.wait_for_selector(
+                    '//*[@id="content"]/section/div/section/div[1]/div[1]/h3')
 
-            # No records found page
-            if not success_text and page.wait_for_selector('//*[@id="content"]/div[2]/div/div/div/div'):
-                print('No results found!!')
+                # No records found page
+                if not success_text and page.wait_for_selector('//*[@id="content"]/div[2]/div/div/div/div'):
+                    print('No results found!!')
 
-            html = page.inner_html('#results')
-            soup = BeautifulSoup(html, 'html.parser')
+                html = page.inner_html('#results')
+                soup = BeautifulSoup(html, 'html.parser')
 
-            more_button = page.wait_for_selector(
-                '//div[@class="row"]//a[contains(text(), "More")]')
+                more_button = page.wait_for_selector(
+                    '//div[@class="row"]//a[contains(text(), "More")]')
 
-            all_profiles = []
-            while more_button:
-                try:
-                    people_profiles = extract_person_profiles(soup)
-                    all_profiles += people_profiles
-                    more_button.click()
+                all_profiles = []
+                while more_button:
+                    try:
+                        people_profiles = extract_person_profiles(soup)
+                        all_profiles += people_profiles
+                        more_button.click()
 
-                    # wait for the navigation to complete
-                    page.wait_for_load_state()
+                        # wait for the navigation to complete
+                        page.wait_for_load_state()
 
-                    # Get the new more button on the next page
-                    more_button = page.wait_for_selector(
-                        '//div[@class="row"]//a[contains(text(), "More")]')
-                except TimeoutError:
-                    print(
-                        "Timeout: More button not found within the specified timeout period.")
+                        # Get the new more button on the next page
+                        more_button = page.wait_for_selector(
+                            '//div[@class="row"]//a[contains(text(), "More")]')
+                    except TimeoutError:
+                        print(
+                            "Timeout: More button not found within the specified timeout period.")
 
-                    # Get data from the last page
-                    # Create person profiles from the last page
-                    people_profiles = extract_person_profiles(soup)
-                    all_profiles += people_profiles
-                    break
+                        # Get data from the last page
+                        # Create person profiles from the last page
+                        people_profiles = extract_person_profiles(soup)
+                        all_profiles += people_profiles
+                        break
 
-            print(all_profiles)
-        except:
-            print("An error has occurred in main")
-            raise Exception("An error has occurred in main")
+                print(all_profiles)
+            except:
+                raise Exception("An error has occurred on success page load")
+    except Exception as e:
+        raise Exception("An error has occurred: " + str(e))
 
 
 if __name__ == '__main__':
