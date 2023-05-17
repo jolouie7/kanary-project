@@ -5,104 +5,133 @@ from bs4 import BeautifulSoup
 
 def extract_img(soup):
     imgs = []
-    img_elements = soup.find_all(
-        'img', {'class': 'userThumb img-thumbnail lazy'})
-    if img_elements is not None:
+    try:
+        img_elements = soup.find_all(
+            'img', {'class': 'userThumb img-thumbnail lazy'})
         for img_element in img_elements:
             imgs.append(img_element['data-src'])
+    except Exception as e:
+        raise Exception(
+            f"Error occurred while extracting image URLs: {str(e)}")
     return imgs
 
 
 def extract_name(soup):
     names = []
-    name_divs = soup.find_all(
-        'div', {'class': 'td col col-md-2 name mobile-mt-10'})
-    for name_div in name_divs:
-        name = name_div.find('strong').text.strip()
-        names.append(name)
+    try:
+        name_divs = soup.find_all(
+            'div', {'class': 'td col col-md-2 name mobile-mt-10'})
+        for name_div in name_divs:
+            name = name_div.find('strong').text.strip()
+            names.append(name)
+    except Exception as e:
+        raise Exception(f"Error occurred while extracting names: {str(e)}")
     return names
 
 
 def extract_age(soup):
     ages = []
-    age_divs = soup.find_all(
-        'div', {'class': 'td col col-md-1 age'})
-    for age_div in age_divs:
-        age = age_div.find('strong').text.strip()
-        ages.append(age)
+    try:
+        age_divs = soup.find_all('div', {'class': 'td col col-md-1 age'})
+        for age_div in age_divs:
+            age = age_div.find('strong').text.strip()
+            ages.append(age)
+    except Exception as e:
+        raise Exception(f"Error occurred while extracting ages: {str(e)}")
     return ages
 
 
 def extract_location(soup):
-    location_divs = soup.find_all(
-        'div', {'class': 'td col col-md-2 location'})
+    try:
+        location_divs = soup.find_all(
+            'div', {'class': 'td col col-md-2 location'})
 
-    ul_list = []
-    for div_tag in location_divs:
-        ul_tag = div_tag.find('ul')
-        if ul_tag is not None:
+        ul_list = []
+        for div_tag in location_divs:
+            ul_tag = div_tag.find('ul')
             ul_list.append(ul_tag)
 
-    li_texts = []
-    for ul_tag in ul_list:
-        li_tags = ul_tag.find_all('li')
-        if li_tags is not None:
+        li_texts = []
+        for ul_tag in ul_list:
+            li_tags = ul_tag.find_all('li')
             li_texts.append([li_tag.text.strip()
-                            for li_tag in li_tags])
+                             for li_tag in li_tags])
+    except Exception as e:
+        raise Exception(
+            f"Error occurred while extracting locations: {str(e)}")
 
     return li_texts
 
 
 def extract_related_people(soup):
-    related_ppl_divs = soup.find_all(
-        'div', {'class': 'td col col-md-1 possible-relatives'})
+    try:
+        related_ppl_divs = soup.find_all(
+            'div', {'class': 'td col col-md-1 possible-relatives'})
 
-    related_ppl_ul_list = []
-    for div_tag in related_ppl_divs:
-        ul_tag = div_tag.find('ul')
-        if ul_tag is not None:
+        related_ppl_ul_list = []
+        for div_tag in related_ppl_divs:
+            ul_tag = div_tag.find('ul')
             related_ppl_ul_list.append(ul_tag)
 
-    related_ppl_li_texts = []
-    for ul_tag in related_ppl_ul_list:
-        li_tags = ul_tag.find_all('li')
-        if li_tags is not None:
-            related_ppl_li_texts.append([li_tag.text.strip()
-                                         for li_tag in li_tags])
+        related_ppl_li_texts = []
+        for ul_tag in related_ppl_ul_list:
+            li_tags = ul_tag.find_all('li')
+            related_ppl_li_texts.append(
+                [li_tag.text.strip() for li_tag in li_tags])
+    except Exception as e:
+        raise Exception(
+            f"Error occurred while extracting related peoples: {str(e)}")
 
     return related_ppl_li_texts
 
 
 def extract_phone_number(soup):
     phone_numbers = []
-    phone_number_divs = soup.find_all(
-        'div', {'class': 'td col col-md-2 possible-relatives'})
-    if phone_number_divs is not None:
+    try:
+        phone_number_divs = soup.find_all(
+            'div', {'class': 'td col col-md-2 possible-relatives'})
         for phone_number_div in phone_number_divs:
             phone_number = phone_number_div.find('p').text.strip()
-            if phone_number is not None:
-                phone_numbers.append(phone_number)
+            phone_numbers.append(phone_number)
+    except Exception as e:
+        raise Exception(
+            f"Error occurred while extracting phone numbers: {str(e)}")
     return phone_numbers
 
 
 def extract_confidential_report_id(soup):
     confidental_report_ids = []
-    confidental_report_id_divs = soup.find_all(
-        'div', {'class': 'td col col-md-2'})
-    for confidental_report_id_div in confidental_report_id_divs:
-        confidental_report_id = confidental_report_id_div.find(
-            'strong').text.strip()
-        confidental_report_ids.append(confidental_report_id)
+    try:
+        confidental_report_id_divs = soup.find_all(
+            'div', {'class': 'td col col-md-2'})
+        for confidental_report_id_div in confidental_report_id_divs:
+            confidental_report_id = confidental_report_id_div.find(
+                'strong').text.strip()
+            confidental_report_ids.append(confidental_report_id)
+    except Exception as e:
+        raise Exception(
+            f"Error occurred while extracting confidential report IDs: {str(e)}")
     return confidental_report_ids
 
 
-def create_person_dict(imgs, names, ages, locations, related_peoples, phone_numbers, condifential_report_ids):
+def create_person_dict(imgs, names, ages, locations, related_peoples, phone_numbers, confidential_report_ids):
     person_profiles = []
-    if names is not None:
-        for i in range(len(names)):
-            person = {'img': imgs[i], 'name': names[i], 'age': ages[i], 'location': locations[i],
-                      'related people': related_peoples[i], 'phone number': phone_numbers[i], 'condifential report id': condifential_report_ids[i]}
-            person_profiles.append(person)
+    try:
+        if names is not None:
+            for i in range(len(names)):
+                person = {
+                    'img': imgs[i],
+                    'name': names[i],
+                    'age': ages[i],
+                    'location': locations[i],
+                    'related people': related_peoples[i],
+                    'phone number': phone_numbers[i],
+                    'confidential report id': confidential_report_ids[i]
+                }
+                person_profiles.append(person)
+    except Exception as e:
+        raise Exception(
+            f"Error occurred while creating person profiles: {str(e)}")
     return person_profiles
 
 
@@ -123,31 +152,29 @@ def extract_person_profiles(soup):
 
 
 def fill_first_name(page, first_name):
-    if not first_name:
-        raise ValueError('First name cannot be empty')
     try:
-        page.fill('input.frm-fld-w1', f'{first_name}')
-    except:
-        raise Exception("Error in first name")
+        input_field = page.wait_for_selector('input.frm-fld-w1')
+        input_field.fill(f'{first_name}')
+    except Exception as e:
+        raise Exception(f"Error in filling first name: {str(e)}")
 
 
 def fill_last_name(page, last_name):
-    if not last_name:
-        raise ValueError('Last name cannot be empty')
     try:
-        page.fill('input.frm-fld-w2', f'{last_name}')
-    except:
-        raise Exception("Error in last name")
+        input_field = page.wait_for_selector('input.frm-fld-w2')
+        input_field.fill(f'{last_name}')
+    except Exception as e:
+        raise Exception(f"Error in filling last name: {str(e)}")
 
 
 def select_state(page, state=None):
+    if state is None:
+        return
     try:
-        if state is None:
-            return
-        else:
-            page.select_option('select[name="state"]', state)
-    except:
-        raise Exception("Error selecting state")
+        state_select = page.wait_for_selector('select[name="state"]')
+        state_select.select_option(state)
+    except Exception as e:
+        raise Exception(f"Error selecting state: {str(e)}")
 
 
 def main():
@@ -205,17 +232,17 @@ def main():
                 except TimeoutError:
                     print(
                         "Timeout: More button not found within the specified timeout period.")
-                    # Get data from the last page
 
+                    # Get data from the last page
                     # Create person profiles from the last page
                     people_profiles = extract_person_profiles(soup)
                     all_profiles += people_profiles
                     break
 
-            print(len(all_profiles))
+            print(all_profiles)
         except:
-            print("An error has occurred")
-            raise Exception("An error has occurred")
+            print("An error has occurred in main")
+            raise Exception("An error has occurred in main")
 
 
 if __name__ == '__main__':
