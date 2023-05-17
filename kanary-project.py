@@ -1,5 +1,5 @@
 # sync api but can be used in async mode
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, TimeoutError
 from bs4 import BeautifulSoup
 
 
@@ -171,35 +171,84 @@ def main():
 
             # Get the headline text
             headline = page.inner_text('div.headline h3')
-
             print('headline: ', headline)
 
             html = page.inner_html('#results')
             soup = BeautifulSoup(html, 'html.parser')
 
-            # Extract image src
-            imgs = extract_img(soup)
+            more_button = page.wait_for_selector(
+                '//div[@class="row"]//a[contains(text(), "More")]')
 
-            # Extract name
-            names = extract_name(soup)
+            all_profiles = []
+            while more_button:
+                try:
+                    # Extract image src
+                    imgs = extract_img(soup)
 
-            # Extract age
-            ages = extract_age(soup)
+                    # Extract name
+                    names = extract_name(soup)
 
-            # Extract location
-            locations = extract_location(soup)
+                    # Extract age
+                    ages = extract_age(soup)
 
-            # Extract Related People
-            related_peoples = extract_related_people(soup)
+                    # Extract location
+                    locations = extract_location(soup)
 
-            # extract phone numbers
-            phone_numbers = extract_phone_number(soup)
+                    # Extract Related People
+                    related_peoples = extract_related_people(soup)
 
-            # extract Confidential Report ID
-            condifential_report_ids = extract_condifential_report_id(soup)
+                    # extract phone numbers
+                    phone_numbers = extract_phone_number(soup)
 
-            people_profiles = create_person_dict(
-                imgs, names, ages, locations, related_peoples, phone_numbers, condifential_report_ids)
+                    # extract Confidential Report ID
+                    condifential_report_ids = extract_condifential_report_id(
+                        soup)
+
+                    people_profiles = create_person_dict(
+                        imgs, names, ages, locations, related_peoples, phone_numbers, condifential_report_ids)
+
+                    all_profiles += people_profiles
+                    more_button.click()
+
+                    # wait for the navigation to complete
+                    page.wait_for_load_state()
+
+                    # Get the new more button on the next page
+                    more_button = page.wait_for_selector(
+                        '//div[@class="row"]//a[contains(text(), "More")]')
+                except TimeoutError:
+                    print(
+                        "Timeout: More button not found within the specified timeout period.")
+                    # Get last page
+                    # Extract image src
+                    imgs = extract_img(soup)
+
+                    # Extract name
+                    names = extract_name(soup)
+
+                    # Extract age
+                    ages = extract_age(soup)
+
+                    # Extract location
+                    locations = extract_location(soup)
+
+                    # Extract Related People
+                    related_peoples = extract_related_people(soup)
+
+                    # extract phone numbers
+                    phone_numbers = extract_phone_number(soup)
+
+                    # extract Confidential Report ID
+                    condifential_report_ids = extract_condifential_report_id(
+                        soup)
+
+                    people_profiles = create_person_dict(
+                        imgs, names, ages, locations, related_peoples, phone_numbers, condifential_report_ids)
+
+                    all_profiles += people_profiles
+                    break
+
+            print(len(all_profiles))
         except:
             print("An error has occurred")
             raise Exception("An error has occurred")
