@@ -34,8 +34,11 @@ def extract_age(soup):
     try:
         age_divs = soup.find_all('div', {'class': 'td col col-md-1 age'})
         for age_div in age_divs:
-            age = age_div.find('strong').text.strip()
-            ages.append(age)
+            if age_div.find('strong'):
+                age = age_div.find('strong').text.strip()
+                ages.append(age)
+            else:
+                ages.append('N/A')
     except Exception as e:
         raise Exception(f"Error occurred while extracting ages: {str(e)}")
     return ages
@@ -48,14 +51,20 @@ def extract_location(soup):
 
         ul_list = []
         for div_tag in location_divs:
-            ul_tag = div_tag.find('ul')
-            ul_list.append(ul_tag)
+            if div_tag.find('ul'):
+                ul_tag = div_tag.find('ul')
+                ul_list.append(ul_tag)
+            else:
+                ul_list.append('N/A')
 
         li_texts = []
         for ul_tag in ul_list:
-            li_tags = ul_tag.find_all('li')
-            li_texts.append([li_tag.text.strip()
-                             for li_tag in li_tags])
+            if ul_tag == 'N/A':
+                li_texts.append(['N/A'])
+            else:
+                li_tags = ul_tag.find_all('li')
+                li_texts.append([li_tag.text.strip()
+                                for li_tag in li_tags])
     except Exception as e:
         raise Exception(
             f"Error occurred while extracting locations: {str(e)}")
@@ -70,14 +79,20 @@ def extract_related_people(soup):
 
         related_ppl_ul_list = []
         for div_tag in related_ppl_divs:
-            ul_tag = div_tag.find('ul')
-            related_ppl_ul_list.append(ul_tag)
+            if div_tag.find('ul'):
+                ul_tag = div_tag.find('ul')
+                related_ppl_ul_list.append(ul_tag)
+            else:
+                related_ppl_ul_list.append(['N/A'])
 
         related_ppl_li_texts = []
         for ul_tag in related_ppl_ul_list:
-            li_tags = ul_tag.find_all('li')
-            related_ppl_li_texts.append(
-                [li_tag.text.strip() for li_tag in li_tags])
+            if ul_tag == 'N/A':
+                related_ppl_li_texts.append(['N/A'])
+            else:
+                li_tags = ul_tag.find_all('li')
+                related_ppl_li_texts.append(
+                    [li_tag.text.strip() for li_tag in li_tags])
     except Exception as e:
         raise Exception(
             f"Error occurred while extracting related peoples: {str(e)}")
@@ -147,7 +162,6 @@ def extract_person_profiles(soup):
     # Create person profiles
     people_profiles = create_person_dict(
         imgs, names, ages, locations, related_peoples, phone_numbers, confidential_report_ids)
-
     return people_profiles
 
 
@@ -189,7 +203,7 @@ def main():
                 # Fill out the search form
                 fill_first_name(page, 'stephen')
                 fill_last_name(page, 'curry')
-                select_state(page)
+                select_state(page, 'CA')
                 page.click('button[type=submit]')
             except:
                 raise Exception('Failed to fill out form')
@@ -224,8 +238,8 @@ def main():
                         all_profiles += people_profiles
                         more_button.click()
 
-                        # wait for the navigation to complete
-                        page.wait_for_load_state()
+                        # # wait for the navigation to complete
+                        # page.wait_for_load_state()
 
                         # Get the new more button on the next page
                         more_button = page.wait_for_selector(
@@ -240,7 +254,7 @@ def main():
                         all_profiles += people_profiles
                         break
 
-                print(all_profiles)
+                print(len(all_profiles))
             except:
                 raise Exception("An error has occurred on success page load")
     except Exception as e:
