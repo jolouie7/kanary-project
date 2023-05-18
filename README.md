@@ -6,6 +6,7 @@ To run the Kanary Project, you need to have the following installed on your syst
 
 - Python 3.x
 - Playwright library
+- beautifulsoup4
 
 ## Usage
 
@@ -18,13 +19,13 @@ To run the Kanary Project, you need to have the following installed on your syst
 2. Install the required libraries using pip:
 
    ```
-   pip install playwright
+   pip install playwright beautifulsoup4
    ```
 
-3. Run the `main.py` file:
+3. Run the `kanary-project.py` file:
 
    ```
-   python main.py
+   python kanary-project.py
    ```
 
    This will launch the Chromium browser.
