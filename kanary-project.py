@@ -254,7 +254,7 @@ def main():
                         all_profiles += people_profiles
                         break
 
-                print(len(all_profiles))
+                print(all_profiles)
             except:
                 raise Exception("An error has occurred on success page load")
     except Exception as e:
