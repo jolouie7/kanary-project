@@ -238,9 +238,6 @@ def main():
                         all_profiles += people_profiles
                         more_button.click()
 
-                        # # wait for the navigation to complete
-                        # page.wait_for_load_state()
-
                         # Get the new more button on the next page
                         more_button = page.wait_for_selector(
                             '//div[@class="row"]//a[contains(text(), "More")]')
