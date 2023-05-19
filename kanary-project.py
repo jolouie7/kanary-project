@@ -59,7 +59,7 @@ def extract_location(soup):
 
         li_texts = []
         for ul_tag in ul_list:
-            if ul_tag == 'N/A':
+            if ul_tag == ['N/A']:
                 li_texts.append(['N/A'])
             else:
                 li_tags = ul_tag.find_all('li')
@@ -81,19 +81,19 @@ def extract_related_people(soup):
         for div_tag in related_ppl_divs:
             if div_tag.find('ul'):
                 ul_tag = div_tag.find('ul')
-                print(type(ul_tag))
                 related_ppl_ul_list.append(ul_tag)
             else:
                 related_ppl_ul_list.append(['N/A'])
 
         related_ppl_li_texts = []
         for ul_tag in related_ppl_ul_list:
-            if not ul_tag:
+            if ul_tag == ['N/A']:
+                related_ppl_li_texts.append(['N/A'])
+            else:
                 li_tags = ul_tag.find_all('li')
                 related_ppl_li_texts.append(
                     [li_tag.text.strip() for li_tag in li_tags])
-            else:
-                related_ppl_li_texts.append(['N/A'])
+
     except Exception as e:
         raise Exception(
             f"Error occurred while extracting related peoples: {str(e)}")
